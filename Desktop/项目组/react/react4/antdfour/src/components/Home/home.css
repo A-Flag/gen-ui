@@ -1,0 +1,13 @@
+.form-item-css{
+    width: 200px;
+}
+/* .ant-form-item{
+width: 180px;
+} */
+header{
+    display: block;
+    width: 100%;
+    height: 80px;
+    padding:20px 0 0 18px;
+    box-sizing: border-box;
+}

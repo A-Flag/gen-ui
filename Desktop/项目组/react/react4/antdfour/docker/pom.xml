@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<properties>
+		<icbcgd.appname>gdfb-front-jrydz</icbcgd.appname>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<groupId>com.icbcgd</groupId>
+	<artifactId>${icbcgd.appname}</artifactId>
+	<version>${icbcgd.appversion}</version>
+	<name>${icbcgd.appname}</name>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>2.3.0</version>
+				<configuration>
+					<extraDirectories>
+						<paths>
+							<path>jib</path>
+						</paths>
+					</extraDirectories>
+					<container>
+						<entrypoint>
+							<arg>nginx</arg>
+							<arg>-g</arg>
+							<arg>daemon off;</arg>
+						</entrypoint>
+						<!--useCurrentTimestamp>true</useCurrentTimestamp-->
+						<creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+						<filesModificationTime>${maven.build.timestamp}</filesModificationTime>
+					</container>
+					<allowInsecureRegistries>true</allowInsecureRegistries>
+					<from>
+						<image>gdfh.harbor.io/kf1-base/nginx-alpine:1.18</image>
+						<auth>
+					       <username>kf1</username>
+					       <password>${icbcgd.jib.auth.password}</password>
+					   </auth>
+					</from>
+					<to>
+						<!-- 应用镜像命名 -->
+						<image>${icbcgd.imgrepo}/${icbcgd.appname}</image>
+						<tags><tag>${icbcgd.appversion}</tag></tags>
+						<auth>
+					       <username>kf1</username>
+					       <password>${icbcgd.jib.auth.password}</password>
+					   </auth>
+					</to>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
