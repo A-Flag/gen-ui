@@ -1,0 +1,1 @@
+{"version":3,"sources":["assets/css/index.css"],"names":[],"mappings":"AAAA;AACA;AACA;AACA;AACA;AACA;AACA;AACA;AACA","file":"css.5ec3a257.css","sourceRoot":"../src","sourcesContent":["* {\n  margin: 0;\n  padding: 0;\n}\nhtml,\nbody {\n  background-color: bisque;\n}\n"]}
