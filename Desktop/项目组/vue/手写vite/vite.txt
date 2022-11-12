@@ -1,0 +1,51 @@
+模拟人生世界
+传统bundle-base服务器在开发时遇到的两个问题
+vite主要解决了传统开发构建工具启动和更新慢的问题，那么vite是怎样解决这两个问题呢？
+vite主要通过 esbuild预构建依赖和让浏览器接管部分打包程序两种手段解决了这两个问题
+
+它解决的是开发的时候的效率问题，对于生产环境则是交给了Rollup。
+
+对ts、jsx、css等开箱即用，无需配置。
+对于库开发者也是可以通过简单的配置即可打包输出多种格式的包。
+开发和生产共享了rollup的插件接口，大部门的rollup插件可以在vite上使用。
+类型化配置，配置文件可以使用ts，具有配置类型提示。
+
+Vite 原理
+vite主要通过 esbuild预构建依赖和让浏览器接管部分打包程序两种手段解决了这两个问题，下面细讲这两大手段。
+
+esbuild预构建依赖(rebuild：0.37s rollup+terser:37.79s webpack4:43.07s webpack55.25s)esbuild在打包速度上比现在前端打包工具快10-100倍。
+
+vite将代码分为源码和依赖两部分并分别处理，所谓依赖便是应用使用的第三方包，一般存在于node_modules目录中，一个较大项目的依赖及其依赖的依赖，加起来可能达到上千个包，这些代码可能远比我们源码代码量要大，这些依赖通常是不会改变的（除非你要进行本地依赖调试），所以无论是webpack或者vite在启动时都会编译后将其缓存下来。区别的是，vite会使用esbuild进行依赖编译和转换（commonjs包转为esm），而webpack则是使用acorn或者tsc进行编译，而esbuild是使用Go语言写的，其速度比使用js编写的acorn速度要快得多。
+
+而且vite在打包之后，还会对这些依赖包的请求设置cache-control: max-age=31536000,immutable;,即设置了强缓存，之后针对依赖的请求将不会到达服务器。如果要进行依赖调试，可以在启动服务器时使用 --force 标志，它会重新打包依赖。
+
+基本的流程是
+ite命令会触发调用createServer函数，在createServer函数中会调用optimizeDeps进行依赖预构建优化。
+在 optimizeDeps函数中会从入口开始扫描import语句，收集依赖列表deps。
+使用esbuild编译且转换deps中的所有依赖，并将依赖的打包结构缓存至node_modules/.vite目录，在该目录还保存了_metadata.json文件，描述记录了整个预构建的信息。
+
+
+让浏览器接管部分打包
+Bundle based dev server在启动时时会把全部的源码都编译，当一个项目有很多路由页面时，它也会按照每一个路由入口查找编译所有模块，但实际上我们是否需要在启动的时候就打包所有的模块源码？
+
+在启动的时候，vite并不会打包源码，而是在浏览器请求路由时才会进行打包，而且也仅仅打包当前路由的源码，这相当于让浏览器掌握了打包的控制权。从而将Bundle based dev server一次性打包全部源码的操作改为了多次，启动速度无疑会快非常多，并且在访问时转换的速度也不会慢下来，因为每次转换的源码只有当前路由下的；并且源码模块还会设置协商缓存，当模块没有改变时，浏览器的请求会返回304 Not Modified。
+
+这一切的前提是基于原生的ES Module,浏览器在处理ES6 Module时，该模块中所有import进来的module都会通过http请求抓取，并且其请求是精确有序的。ESM还对vite的HMR起了非常大的作用。当源码文件修改时，因为源码采取的是ESM,vite只需要精确地使当前修改模块与其最近的HMR边界失效，大多数情况只需要替换当前修改的模块，这让vite的HMR直接与当前应用的大小没有关系。无论应用多大，都能保持快速的更新速度。
+
+源码，可以发现整个流程:
+
+总的入口是在createServer函数中，在这个函数中，vite创建一个http或https的服务器。使用connect中间件来服务请求，有处理CORS,Proxy等的中间件，其中transformMiddleware中间件用于转换代码。在transformMiddleware中间件中，会先查询moduleGraph中是否存在当前模块，存在则返回，不存在则会调用transformRequest转换源码。最终在transformResult中使用vite plugin完成了对源码的转换，转换后会缓存到moduleGraph中，方便下次直接使用。
+
+Rollup打包
+vite针对的是现代浏览器
+首先，每个模块都会使用一个请求，可以想象一个应用会发出多少请求，这样即便使用HTTP2也会效率低下。
+其次，现代应用为了性能，需要做tree-shaking、懒加载和代码分割等优化，以减小应用的体积和更好地做浏览器缓存。
+
+那么vite是否可以直接使用esbuild进行打包，保持开发和生产的统一？从长期看来是可以这样的，但是就目前而言，esbuild对css和代码分割的支持不够友好，更多针对应用的构建能力还在持续开发中。因此，vite选择了同样采用ESM格式的rollup来进行打包，并且vite的插件采用了rollup的rollup-superset接口，这使大部分的rollup的插件都能在vite上使用。
+
+
+
+
+
+
+

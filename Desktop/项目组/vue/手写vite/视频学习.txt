@@ -1,0 +1,40 @@
+支持reactive,angular,svelte项目
+
+什么是构建工具
+1.模块化开发支持：支持直接从node_modules里引入代码+多种模块化支持
+2.处理代码兼容性，比如babel语法降级，less,ts语法转换(语法自动化处理)
+3.提高项目性能：打包压缩文件，代码分割
+4.优化开发体验:构建工具会自动监听文件变化，档文件变化以后自动帮你调用对应集成工具进行重新打包，然后再浏览器重新运行
+  跨域问题，热更新
+
+
+项目大，需要处理的js文件越多
+ ----
+const loads = require("lodash");//commonjs规范
+import Vue from "vue" //esm
+
+Webpack转换结果(webpack编译原理，ast抽象语法分析工具，分析js文件，有哪些导入与导出操作，构建工具是运行在服务端的)
+const loads = webpack_require("lodash");
+const Vue = webpack_require("vue");
+
+(fun(modules){
+   function webpack_require(){}
+})()
+
+Webpack模块化之前，它一开始必须统一模块化代码，所以意味着所有依赖都要读一遍
+
+vite侧重点：浏览器端开发体验
+Webpack侧重兼容性
+
+vite(create-vite)脚手架与vite
+create-vite内置了vite
+Vue-cli会内置webpack
+
+预设：买房子，毛坯房
+
+Vue-cli/create-react-app(开发商)：给我提供精装修模版
+
+Create-vite（开发商）:提供了精装模版：vite, vue, post-css,less,babel
+
+开箱即用：不需要额外配置
+

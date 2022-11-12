@@ -1,0 +1,33 @@
+1.svelte(像写原生js)
+
+极简的组件表达方式
+无虚拟dom底层实现
+源于强大的编译能力
+
+2.solid
+针对react
+react hooks和composition api的综合体
+自动依赖追踪避免设置依赖项
+
+
+
+它们都放弃了虚拟dom底层
+体验好
+
+
+ssg
+islands
+注水、
+astro  qwik
+next,nuxt
+
+响应式，组件化，编译优化，运行时，虚拟don,内置组件
+
+jsx, 组件化,fiber,hooks,虚拟dom，concurrent
+
+
+
+
+
+
+
